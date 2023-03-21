@@ -70,7 +70,7 @@ const App = ()=>  {
     );
   }
 
-  const onSelectFile = (e: any) => {
+  const onSelectFile = (e:  React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) {
         setSelectedFile(undefined)
         return
@@ -101,17 +101,17 @@ const App = ()=>  {
     }
   }
 
-  const handleEmbeImage = (evt: any) => {
+  const handleEmbeImage = (evt: React.MouseEvent<HTMLButtonElement>) => {
     evt.preventDefault(); 
     setStoreImage([ ...storeImage, preview])
-    // setSelectedFile(undefined);
-    // setPreview('')
+    setSelectedFile(undefined);
+    setPreview('')
     setModal(false);
     setOpenDropdown(false);
     handleFocus(preview, 'insertImage');
   };
 
-  const handleVideo = (e: any) => {
+  const handleVideo = () => {
     setModal(false);
     setOpenDropdown(false);
     handleFocus(code, 'insertHTML');
@@ -238,7 +238,7 @@ const App = ()=>  {
     </div>
   );
 
-  const handleColor = (event: any) => {
+  const handleColor = (event: React.ChangeEvent<HTMLSelectElement>) => {
     document.execCommand('foreColor', false, event.target.value);
   };
 
@@ -248,12 +248,12 @@ const App = ()=>  {
     social: <Social />
   };
 
-  const handleFontSize = (event: any) => {
+  const handleFontSize = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setChangeValue(event.target.value)
     document.execCommand('fontSize', false, event.target.value);
   };
 
-  const handleHeading = (event: any) => {
+  const handleHeading = (event: React.ChangeEvent<HTMLSelectElement>) => {
     if(event.target.value === 'Paragraph') {
       document.execCommand('insertParagraph', false, event.target.value);
     }else {
@@ -263,7 +263,7 @@ const App = ()=>  {
 
   const handleEditable = (e: any) => setWordList(e.currentTarget.textContent.length);
 
-  const handleFont = (event: any) => {
+  const handleFont = (event: React.ChangeEvent<HTMLSelectElement>) => {
     document.execCommand('fontName', false, event.target.value.toLowerCase());
   };
 
