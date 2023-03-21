@@ -1,40 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-//import * as sanitizeHtml from 'sanitize-html';
 import './index.scss';
 import OpenSVG from '../../asset/Open';
 import ImageSVG from '../../asset/Image';
 import PicSVG from '../../asset/Pic';
-import ItalicSVG from '../../asset/Italic';
+import ItalicSVG from '../../asset/ItalicSvg';
 import BoldSVG from '../../asset/Bold';
-import LinkSVG from '../../asset/Link'; 
 import AlignLeft from '../../asset/AlignLeft';
 import CenterSvg from '../../asset/Center';
 import Right from '../../asset/Right';
 import Justify from '../../asset/Justify';
 import List from '../../asset/List';
-//import ImageIcon from '../../asset/ImageSvg';
+import Underline from '../../asset/Underline';
 
 interface IPropsEdit {
   cmd: string;
   arg?: string;
   name?: string;
   Icon?: React.ElementType;
-}
-
-function EditButton({ cmd, arg, name, Icon }: IPropsEdit) {
-  return (
-    <button
-      key={cmd}
-      className="app__edit-btn"
-      onMouseDown={evt => {
-        evt.preventDefault(); 
-        document.execCommand(cmd, false, arg); 
-      }}
-    >
-      {Icon && <Icon />}
-      {name}
-    </button>
-  );
 }
 
 const App = ()=>  {
@@ -48,6 +30,12 @@ const App = ()=>  {
   const [currentDropdown, setCurrentDropdown] = useState('image');
   const [url, setUrl] = useState<string>('');
   const [code, setCode] = useState('');
+  const [changeValue, setChangeValue] = useState<string>('');
+  const [wordList, setWordList] = useState<number>(0);
+  const [contentEditable, setContentEditable] = useState<any>('true');
+  const [htmlContent, setHtmlContent] = useState<string>('');
+  const [titlePost, setTitlePost] = useState<string>('');
+  const [showPost, setShowPost] = useState<boolean>(false);
 
   useEffect(() => {
     if (!selectedFile) {
@@ -60,6 +48,27 @@ const App = ()=>  {
     return () => URL.revokeObjectURL(objectUrl)
   }, [selectedFile]);
 
+  useEffect(() => {
+    if(wordList === 1000) {
+      setContentEditable('false');
+    }
+  },[wordList]);
+
+  const EditButton = ({ cmd, arg, name, Icon }: IPropsEdit) => {
+    return (
+      <button
+        key={cmd}
+        className="app__edit-btn"
+        onMouseDown={evt => {
+          evt.preventDefault(); 
+          document.execCommand(cmd, false, arg); 
+        }}
+      >
+        {Icon && <Icon />}
+        {name}
+      </button>
+    );
+  }
 
   const onSelectFile = (e: any) => {
     if (!e.target.files || e.target.files.length === 0) {
@@ -78,12 +87,12 @@ const App = ()=>  {
         if(sel !== null) {
           if(ref.current?.lastChild?.nodeValue === null) {
             sel.collapse(ref.current?.lastChild, 0);
-            document.execCommand('insertHTML', false, '<br>');
+            document.execCommand('insertHTML', false, '<br><br><br>>br>');
             document.execCommand(insertType, false, valueType);
             document.execCommand('insertHTML', false, '<br><br>');
           } else {
             sel.collapse(ref.current?.lastChild, length);
-            document.execCommand('insertHTML', false, '<br>');
+            document.execCommand('insertHTML', false, '<br><br>');
             document.execCommand(insertType, false, valueType);
             document.execCommand('insertHTML', false, '<br><br>');
           }
@@ -124,13 +133,12 @@ const App = ()=>  {
   const handleUrlInput = (e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value);
   const handleCode = (e: React.ChangeEvent<HTMLInputElement>) => setCode(e.target.value);
 
-  console.log(html, 'html1')
   const handlePost = () => {
-    setHtml(html);
     if(ref.current !== null) {
-      console.log(ref.current.innerText, 'html')
+      setHtmlContent(ref.current.outerHTML)
+      setShowPost(true);
     }
-  }
+  };
 
   const AddImage = () => (
     <div className="modal-content">
@@ -228,37 +236,149 @@ const App = ()=>  {
     </button>
     </div>
     </div>
-  )
+  );
+
+  const handleColor = (event: any) => {
+    document.execCommand('foreColor', false, event.target.value);
+  };
 
   const dropdownOption: {[key: string]: React.ReactNode} = {
     image: <AddImage />,
     video: <AddVideo />,
     social: <Social />
-  }
+  };
+
+  const handleFontSize = (event: any) => {
+    setChangeValue(event.target.value)
+    document.execCommand('fontSize', false, event.target.value);
+  };
+
+  const handleHeading = (event: any) => {
+    if(event.target.value === 'Paragraph') {
+      document.execCommand('insertParagraph', false, event.target.value);
+    }else {
+      document.execCommand('formatBlock', false, event.target.value);
+    }
+  };
+
+  const handleEditable = (e: any) => setWordList(e.currentTarget.textContent.length);
+
+  const handleFont = (event: any) => {
+    document.execCommand('fontName', false, event.target.value.toLowerCase());
+  };
+
+  const FontDropdown = () => (
+    <select 
+      name="Font Size"
+      onChange={handleFontSize}
+      value={changeValue} 
+      className="app__edit-select"
+    >
+      <option>1</option>
+      <option>2</option>
+      <option>3</option>
+      <option>4</option>
+      <option>5</option>
+      <option>6</option>
+      <option>7</option>
+    </select>
+  );
+
+  const ColorDropdown = () => (
+    <select 
+      name="Color"
+      onChange={handleColor}
+      className="app__edit-select"
+    >
+      <option value="#000000">Black</option>
+      <option value="#008080">Teal</option>
+      <option value="#C0C0C0">Silver</option>
+      <option value="#800000">Maroon</option>
+      <option value="#FF0000">Red</option>
+      <option value="#800080">Purple</option>
+      <option value="#008000">Green</option>
+      <option value="#FFFF00">Yellow</option>
+    </select>
+  );
+
+  const HeadingDropdown = () => (
+    <select 
+      name="Heading"
+      onChange={handleHeading}
+      className="app__edit-select"
+    >      
+      <option value="paragraph">Paragraph</option>
+      <option value="h6">Heading 6</option>
+      <option value="h5">Heading 5</option>
+      <option value="h4">Heading 4</option>
+      <option value="h3">Heading 3</option>
+      <option value="h2">Heading 2</option>
+      <option value="h1">Heading 1</option>
+    </select>
+  );
+
+  const HeadingFont = () => (
+    <select 
+      name="Font"
+      onChange={handleFont}
+      className="app__edit-select"
+    >      
+      <option>Arial</option>
+      <option>Verdana</option>
+      <option>Tahoma</option>
+      <option>Trebuchet MS</option>
+      <option>Times New Roman</option>
+      <option>Georgia</option>
+      <option>Garamond</option>
+      <option>Courier New</option>
+      <option>Brush Script MT</option>
+    </select>
+  );
 
   return (
     <div className='app'>
+      {
+        showPost && (
+          <div className="app__container">
+            <span className="close" onClick={() => setShowPost(false)}>&times;</span>
+            <p className="app__title-top">{titlePost}</p>
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          </div>
+        )
+      }
       <div className="app__container">
-        <div contentEditable="true" className="app__title-top">Add a Title</div>
+        <div 
+          contentEditable="true" 
+          className="app__title-top"
+          onInput={(e: any) => setTitlePost(e.currentTarget.textContent)}
+        >
+            Add a Title
+        </div>
         <div className="app__button-container">
+          <HeadingDropdown />
           <EditButton cmd="italic" Icon={ItalicSVG} />
           <EditButton cmd="bold" Icon={BoldSVG} />
-          <EditButton cmd="formatBlock" arg="h1" name="H" />
-          <EditButton cmd="paragraph" name="P" />
           <EditButton cmd="justifyLeft" Icon={AlignLeft} />
           <EditButton cmd="justifyCenter" Icon={CenterSvg} />
           <EditButton cmd="justifyRight" Icon={Right} />
           <EditButton cmd="insertOrderedList" Icon={List} />
           <EditButton cmd="insertUnorderedList" Icon={List} />
           <EditButton cmd="justify" Icon={Justify} />
+          <EditButton cmd="fontName" name="Font" arg="arial" />
+          <EditButton cmd="insertHorizontalRule" name="L" />
+          <FontDropdown />
+          <ColorDropdown />
+          <EditButton cmd="underline" Icon={Underline} />
+          <HeadingFont />
         </div>
           <div>
             <div
               className="app__content-edit"
-              contentEditable="true"
+              contentEditable={contentEditable}
               id="editable"
               ref={ref}
               dangerouslySetInnerHTML={{ __html: html }}
+              onInput={handleEditable}
             />
             <button onClick={() => setOpenDropdown(!openDropdown)} className="app__button">
               <OpenSVG />
@@ -303,12 +423,13 @@ const App = ()=>  {
           </div>
         </div>
         <div className="app__words">
-            <p>0/1000 words</p>
+            <p>{wordList}/1000 words</p>
           </div>
         <div className="app__post">
           <button 
             className="app__add-image" 
             onClick={handlePost}
+            disabled={wordList === 0}
           >
             Post
           </button>

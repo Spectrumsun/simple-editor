@@ -1,11 +1,10 @@
 .app {
   margin: 0 auto;
-  width: 55em;
   max-width: calc(100% - 4em);
   margin-top: 50px;
   overflow: scroll;
   background-color: #ffffff;
-  width: 55em;
+  width: 70em;
 
   &__container {
     background-color: #FAFAFA;
@@ -243,6 +242,22 @@
     p {
       font-size: 12px;
     }
+  }
+
+  &__edit-select {
+    padding: 10px;
+    background-color: #FFFFFF;
+    box-shadow: 3px 5px 20px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(33, 63, 125, 0.06);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    &:active {
+      transform: translateY(4px);
+    }
+  }
+  &__button-container {
+    display: flex;
   }
 
 }
