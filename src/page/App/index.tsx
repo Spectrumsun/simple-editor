@@ -19,6 +19,18 @@ interface IPropsEdit {
   Icon?: React.ElementType;
 }
 
+// interface File extends Blob {
+//   name: string;
+// }
+
+interface File extends Blob {
+  readonly size: number;
+  readonly type: string;
+  readonly name: string;
+  slice(start?: number, end?: number, contentType?: string): Blob;
+}
+
+
 const App = ()=>  {
   const ref = useRef<HTMLInputElement | null>(null);
   const [openDropdown, setOpenDropdown] = useState(false);
@@ -36,15 +48,20 @@ const App = ()=>  {
   const [htmlContent, setHtmlContent] = useState<string>('');
   const [titlePost, setTitlePost] = useState<string>('');
   const [showPost, setShowPost] = useState<boolean>(false);
+  const [videoType, setVideoType] = useState<string>('youtube');
+  const [fileName, setFileName] = useState<string>('');
+  const [linkTitle, setLinkTitle] = useState<string>('Facebook');
 
   useEffect(() => {
     if (!selectedFile) {
         setPreview('')
         return
     };
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    setFileName(selectedFile['name']);
     const objectUrl = URL.createObjectURL(selectedFile)
     setPreview(objectUrl)
-
     return () => URL.revokeObjectURL(objectUrl)
   }, [selectedFile]);
 
@@ -114,10 +131,39 @@ const App = ()=>  {
   };
 
   const handleVideo = () => {
-    setModal(false);
-    setOpenDropdown(false);
-    handleFocus(code, 'insertHTML');
-    setCode('');
+    if (videoType === 'youtube') {
+      handleFocus(code, 'insertHTML');
+      setCode('');
+      setModal(false);
+      setOpenDropdown(false);
+    } else if (videoType === 'device'){
+      const videoTag = `
+        <h3>${fileName}</h3>
+        <br>
+        <video width="400" controls>
+            <source src=${preview} type="video/mp4">
+            Your browser does not support HTML video.
+        </video>
+      `
+      handleFocus(videoTag, 'insertHTML');
+      setCode('');
+      setModal(false);
+      setOpenDropdown(false);
+      setSelectedFile(undefined);
+      setPreview('')
+    } else {
+      const videoTag = `
+      <h3>Video</h3>
+        <br>  
+      <video width="400" controls>
+          <source src=${code} type="video/mp4">
+          Your browser does not support HTML video.
+      </video>` 
+      handleFocus(videoTag, 'insertHTML');
+      setCode('');
+      setModal(false);
+      setOpenDropdown(false);
+    }
   };
 
   const handleCloseModal = () => {
@@ -129,7 +175,8 @@ const App = ()=>  {
   const handleEmbeSocial = () => {
     setModal(false);
     setOpenDropdown(false);
-    handleFocus(url, 'insertHTML');
+    const urlHtml =  `<a href=${url} target="_blank" contenteditable="false">${linkTitle}</a>`;
+    handleFocus(urlHtml, 'insertHTML');
   };
 
   const handleUrlInput = (e: React.ChangeEvent<HTMLInputElement>) => setUrl(e.target.value);
@@ -140,6 +187,29 @@ const App = ()=>  {
       setHtmlContent(ref.current.outerHTML)
       setShowPost(true);
     }
+  };
+
+  const handleColor = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    document.execCommand('foreColor', false, event.target.value);
+  };
+
+  const handleFontSize = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setChangeValue(event.target.value)
+    document.execCommand('fontSize', false, event.target.value);
+  };
+
+  const handleHeading = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    if(event.target.value === 'Paragraph') {
+      document.execCommand('insertParagraph', false, event.target.value);
+    }else {
+      document.execCommand('formatBlock', false, event.target.value);
+    }
+  };
+
+  const handleEditable = (e: any) => setWordList(e.currentTarget.textContent.length);
+
+  const handleFont = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    document.execCommand('fontName', false, event.target.value.toLowerCase());
   };
 
   const AddImage = () => (
@@ -179,32 +249,73 @@ const App = ()=>  {
 
   const AddVideo = () => (
     <div className="modal-content">
-    <span className="close" onClick={handleCloseModal}>&times;</span>
-    <p className="app__title">Embed</p>
-    <p className="app__upload">VIDEO PROVIDER</p>
-    <div className="app__others">
-      <label className='app__label'>Video Provider</label>
-      <input type="text" value="Youtube" disabled className="app__input"/>
-      <label className='app__label'>CODE</label>
-      <input 
-        type="text"
-        value={code} 
-        onChange={handleCode}
-        className="app__input"
-        autoFocus
-      />
-    </div>
-    <div>
-      <button 
-        className="app__add-image" 
-        onClick={handleVideo}
-      >
-        Embed
-      </button>
-      <button className="app__add-cancel" 
-        onClick={handleCloseModal}
-      >Cancel</button>
-    </div>
+      <span className="close" onClick={handleCloseModal}>&times;</span>
+      <p className="app__title">Embed</p>
+      <p className="app__upload">VIDEO PROVIDER</p>
+      {
+        !selectedFile &&  (
+          <div className="app__others">
+          <label className='app__label'>Video Provider</label>
+          <select 
+            name="Color"
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setVideoType(e.target.value)}
+            className="app__edit-select"
+            style={{ fontSize: '15px' }}
+            value={videoType}
+          >
+            <option value="youtube">Youtube</option>
+            <option value="video url">Video URL</option>
+            <option value="device">Your Device</option>
+          </select>
+          {
+            videoType === 'device' 
+            ? (
+              <div className="app__image">
+              {
+                !selectedFile && (
+                  <>
+                    <input type="file" id="upload" hidden onChange={onSelectFile} />
+                    <label htmlFor="upload">Import video from device</label>
+                  </>
+                )
+              }
+            </div>
+            ) : 
+            (
+              <>
+                <label className='app__label'>{videoType ? 'CODE' : 'URL'}</label>
+                <input 
+                  type="text"
+                  value={code} 
+                  onChange={handleCode}
+                  className="app__input"
+                  autoFocus
+                />
+              </>
+            )
+          }
+          </div>
+        )
+      }
+      {selectedFile &&  
+        <div className="app__preview-video">
+          <video width="400" controls>
+              <source src={preview} type="video/mp4" />
+              Your browser does not support HTML video.
+          </video>
+        </div>
+      }
+      <div>
+        <button 
+          className="app__add-image" 
+          onClick={handleVideo}
+        >
+          Embed
+        </button>
+        <button className="app__add-cancel" 
+          onClick={handleCloseModal}
+        >Cancel</button>
+      </div>
     </div>
   );
 
@@ -214,7 +325,18 @@ const App = ()=>  {
     <p className="app__title">Embed</p>
     <div className="app__others">
       <label className='app__label' style={{ textTransform: 'uppercase'}}>Social Media platform</label>
-      <input type="text" value="Facebook" disabled className="app__input"/>
+      <select 
+        name="Social"
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setLinkTitle(e.target.value)}
+        className="app__edit-select"
+        style={{ fontSize: '15px', backgroundColor: '#FEFEFE' }}
+        value={linkTitle}
+        >
+          <option>Facebook</option>
+          <option>Instagram</option>
+          <option>Twitter</option>
+          <option>Others</option>
+      </select>
       <label className='app__label'>URL</label>
       <input 
         type="text"
@@ -240,33 +362,10 @@ const App = ()=>  {
     </div>
   );
 
-  const handleColor = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    document.execCommand('foreColor', false, event.target.value);
-  };
-
   const dropdownOption: {[key: string]: React.ReactNode} = {
     image: <AddImage />,
     video: <AddVideo />,
     social: <Social />
-  };
-
-  const handleFontSize = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setChangeValue(event.target.value)
-    document.execCommand('fontSize', false, event.target.value);
-  };
-
-  const handleHeading = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    if(event.target.value === 'Paragraph') {
-      document.execCommand('insertParagraph', false, event.target.value);
-    }else {
-      document.execCommand('formatBlock', false, event.target.value);
-    }
-  };
-
-  const handleEditable = (e: any) => setWordList(e.currentTarget.textContent.length);
-
-  const handleFont = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    document.execCommand('fontName', false, event.target.value.toLowerCase());
   };
 
   const FontDropdown = () => (
@@ -337,9 +436,6 @@ const App = ()=>  {
     </select>
   );
 
-  const ImageUrl = () => {
-
-  }
 
   return (
     <div className='app'>

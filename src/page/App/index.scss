@@ -152,6 +152,19 @@
     }
   }
 
+    &__preview-video {
+     justify-content: center;
+      display: flex;
+    img {
+      height: 100%; 
+      width: 100%; 
+      object-fit: contain;
+    }
+  }
+
+
+ 
+
   label {
     text-transform: capitalize;
     border: 2px solid #288341;
