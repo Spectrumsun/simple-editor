@@ -87,7 +87,7 @@ const App = ()=>  {
         if(sel !== null) {
           if(ref.current?.lastChild?.nodeValue === null) {
             sel.collapse(ref.current?.lastChild, 0);
-            document.execCommand('insertHTML', false, '<br><br><br>>br>');
+            document.execCommand('insertHTML', false, '<br><br><br><br>');
             document.execCommand(insertType, false, valueType);
             document.execCommand('insertHTML', false, '<br><br>');
           } else {
@@ -97,6 +97,8 @@ const App = ()=>  {
             document.execCommand('insertHTML', false, '<br><br>');
           }
         }
+      }else {
+        document.execCommand(insertType, false, valueType);
       }
     }
   }
@@ -334,6 +336,10 @@ const App = ()=>  {
       <option>Brush Script MT</option>
     </select>
   );
+
+  const ImageUrl = () => {
+
+  }
 
   return (
     <div className='app'>
