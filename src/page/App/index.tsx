@@ -139,11 +139,11 @@ const App = ()=>  {
     } else if (videoType === 'device'){
       const videoTag = `
         <h3>${fileName}</h3>
-        <br>
         <video width="400" controls>
             <source src=${preview} type="video/mp4">
             Your browser does not support HTML video.
         </video>
+        <br>
       `
       handleFocus(videoTag, 'insertHTML');
       setCode('');
@@ -154,11 +154,12 @@ const App = ()=>  {
     } else {
       const videoTag = `
       <h3>Video</h3>
-        <br>  
-      <video width="400" controls>
-          <source src=${code} type="video/mp4">
-          Your browser does not support HTML video.
-      </video>` 
+        <video width="400" controls>
+            <source src=${code} type="video/mp4">
+            Your browser does not support HTML video.
+        </video>
+        <br>
+      `;
       handleFocus(videoTag, 'insertHTML');
       setCode('');
       setModal(false);
@@ -175,7 +176,7 @@ const App = ()=>  {
   const handleEmbeSocial = () => {
     setModal(false);
     setOpenDropdown(false);
-    const urlHtml =  `<a href=${url} target="_blank" contenteditable="false">${linkTitle}</a>`;
+    const urlHtml =  `<a href=${url} target="_blank" contenteditable="false">${linkTitle}</a><br>`;
     handleFocus(urlHtml, 'insertHTML');
   };
 
